@@ -149,9 +149,11 @@ layout: default
 <ul>
 <li><code>__minerl_all_posts</code>          - ARRAY, used in LOOP, available in all templates</li>
 <li><code>__minerl_recent_posts</code>       - ARRAY, used in LOOP, available in all templates</li>
-<li><code>__minerl_archived_posts</code>     - ARRAY, used in LOOP, available in all templates</li>
 <li><code>__minerl_archived_months</code>    - ARRAY, used in LOOP, available in all templates</li>
+<li><code>__minerl_archived_posts</code>     - ARRAY, used in LOOP, available in templates applied on pages of type <code>archive</code> </li>
 <li><code>__minerl_cur_month</code>          - string SCALAR, available in templates applied on pages of type <code>archive</code> </li>
+<li><code>__minerl_all_tags</code>           - ARRAY, used in LOOP, available in all templates</li>
+<li><code>__minerl_tagged_posts</code>       - ARRAY, used in LOOP, available in templates applied on pages of type <code>taglist</code> </li>
 <li><code>__minerl_cur_tag</code>            - string SCALAR, available in templates applied on pages of type <code>taglist</code> </li>
 </ul>
 
@@ -169,6 +171,32 @@ layout: default
 </ul>
 
 <p>Besides the above variables, all user defined variables in page headers are available to all templates. </p>
+
+<h3 id="examples">Examples</h3>
+
+<p>The following code use the <code>__minerl_all_posts</code> variable to list all posts of the site:</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;TMPL_LOOP __minerl_all_posts&gt;
+        &lt;li&gt;&lt;a href="&lt;TMPL_VAR __post_link&gt;"&gt;&lt;TMPL_VAR __post_title&gt;&lt;/a&gt;&lt;/li&gt;
+        &lt;div class="post_content"&gt;
+            &lt;TMPL_VAR __post_excerpt&gt;... 
+        &lt;/div&gt;
+    &lt;/TMPL_LOOP&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>The following code use the <code>__minerl_tagged_posts</code> variable to list all posts of a certain tag:</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;TMPL_LOOP __minerl_tagged_posts&gt;
+        &lt;li&gt;&lt;a href="&lt;TMPL_VAR __post_link&gt;"&gt;&lt;TMPL_VAR __post_title&gt;&lt;/a&gt;&lt;/li&gt;
+        &lt;div class="post_content"&gt;
+            &lt;TMPL_VAR __post_excerpt&gt;... 
+        &lt;/div&gt;
+    &lt;/TMPL_LOOP&gt;
+&lt;/ul&gt;
+</code></pre>
 
 <h2 id="formats">Formats</h2>
 
