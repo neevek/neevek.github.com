@@ -5,6 +5,7 @@ format: markdown
 type: post
 tags: minerl, perl
 timestamp: 1372332934
+description: Minerl is a blog-aware static site generator written in Perl, it supports tagging, automatic archiving, post, page, layout inheritance.
 ---
 
 ## Introduction
@@ -155,7 +156,4 @@ The following code uses the `__minerl_tagged_posts` variable to list all posts o
 
 Currently **Minerl** supports [markdown](http://search.cpan.org/~bobtfish/Text-MultiMarkdown-1.000034/lib/Text/MultiMarkdown.pm) and Perl script, you can write your pages using markdown, like the one I am writing and embed some perl scripts in the page.
 
-Okay, that is almost all about the first release of **Minerl**. Enjoy!
-
-For more information, please run `minerl -h`.
-
+For more information, run `minerl -h`.
