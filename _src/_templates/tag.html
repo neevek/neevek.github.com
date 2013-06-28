@@ -6,7 +6,7 @@ layout: default
 
     <ul>
         <TMPL_LOOP __minerl_tagged_posts>
-        <li><a href="<TMPL_VAR __post_link>"><TMPL_VAR __post_title></a></li>
+        <li><a href="<TMPL_VAR __post_link>"><TMPL_VAR __post_title></a> - <span class="createdate"><TMPL_VAR __post_createdate></span></li>
         <div class="post_content">
             <TMPL_VAR __post_excerpt>... 
         </div>

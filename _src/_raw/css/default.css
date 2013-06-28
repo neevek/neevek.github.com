@@ -107,7 +107,7 @@ code {
     display: inline;
     background: #f3f3f3;
     border: 1px #cfcfcf solid;
-    padding: 0px 3px;
+    padding: 0px 3px 2px 3px;
     margin: 4px 2px;
 }
 pre code {

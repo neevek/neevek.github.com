@@ -1,0 +1,170 @@
+<!DOCTYPE HTML >
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="description" content="A tutorial on using Minerl, a static site generator written in perl, with github pages.">
+        <title>Using Minerl with Github Pages</title>
+        <link href='http://fonts.googleapis.com/css?family=EB+Garamond|Nothing+You+Could+Do|Titillium+Web' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/css/default.css" type="text/css" media="screen" charset="utf-8">
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="header">
+                <div id="nav">
+                    <ul>
+                        <li><a href="/index.html">HOME</a></li>
+                        <li><a href="/all-posts.html">POSTS</a></li>
+                        <li><a href="/about.html">ABOUT</a></li>
+                    </ul>
+                </div>
+                <div id="sig">
+                    driven by thirst for knowledge.
+                </div>
+            </div>
+
+            <div id="body">
+                <div id="content">
+    <h2 class="title">Using Minerl with Github Pages</h2>
+
+    <div class="postmeta">
+        <span class="postmeta_text">Posted on</span> <span class="createdate"><a href="#" title="05:31 PM">Jun 28, 2013</a></span> by <span class="author">neevek</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="postmeta_text">Tags:</span>
+        
+        <span class="postmeta_tags"><a href="/tags/minerl.html">minerl</a></span>, 
+        
+        <span class="postmeta_tags"><a href="/tags/github.html">github</a></span>
+        
+
+    </div>
+
+    <div class="postcontent">
+        <p>Well this does not seem convincing, but I wrote <a href="https://github.com/neevek/minerl">Minerl</a> because I am going to start blogging about my study and work experience after having worked as a programmer for more than 5 years, for doing that, I need a blog and then I need a static site generator because I was planning to use <a href="http://pages.github.com/">Github Pages</a>, so I made one, which is also part of my study experience.</p>
+
+<p>Github Pages is cool, with it you don't need to rent a VPS just to host a few megabytes of all your pages, it also saves you a few bucks per month. You don't need to manage your web server since there's no one, Github Pages also eases the process of publishing your site(simply with <code>git push</code>).</p>
+
+<p>To start using Github Pages, you need to register an account on <code>github.com</code>, create a repo of the name <code>YOUR_NAME.github.com</code>, like mine for this site is <a href="https://github.com/neevek/neevek.github.com">neevek.github.com</a>. After the repo is created, clone it into a local directory and put pages in that directory, and when you are ready to publish the pages, push them and github does the rest for you. </p>
+
+<p>I will demonstrate in the following the process of how I build this site with Minerl and publish it on Github Pages.</p>
+
+<p>First I clone the repo, currently I have the following structure:</p>
+
+<pre><code>neevek@~$ git clone https://github.com/neevek/neevek.github.com.git
+neevek@~$ cd neevek.github.com 
+neevek@neevek.github.com[master]$ tree
+.
+├── 2013
+│   └── 06
+│       └── 27
+│           └── introduction-to-minerl.html
+├── CNAME
+├── _src
+│   ├── _pages
+│   │   ├── 2013
+│   │   │   └── 06
+│   │   │       └── 27
+│   │   │           └── introduction-to-minerl.md
+│   │   ├── about.md
+│   │   ├── all-posts.md
+│   │   ├── archive.html
+│   │   ├── index.md
+│   │   └── tag.html
+│   ├── _raw
+│   │   ├── css
+│   │   │   └── default.css
+│   │   └── js
+│   │       └── hello.js
+│   ├── _templates
+│   │   ├── allposts.html
+│   │   ├── archive.html
+│   │   ├── default.html
+│   │   ├── index.html
+│   │   ├── post.html
+│   │   └── tag.html
+│   └── minerl.cfg
+├── about.html
+├── all-posts.html
+├── archives
+│   └── 2013
+│       └── 06.html
+├── css
+│   └── default.css
+├── index.html
+├── js
+│   └── hello.js
+└── tags
+    ├── minerl.html
+    └── perl.html
+</code></pre>
+
+<p>As you can see, there is a <code>_src</code> directory, which holds a <code>minerl.cfg</code> file and other <em>resource</em> files of the site, the reason why the directory starts with an underscore is from <a href="http://help.github.com/articles/files-that-start-with-an-underscore-are-missing">this</a>, so contents in <code>_src</code>(including the directory itself) will not be published as part of the site. Now when I finish this new post, I will do this:</p>
+
+<pre><code>cd _src/
+minerl build
+cd ../
+git add .
+git commit -m 'added a new post'
+git push origin master
+</code></pre>
+
+<p>With a few commands, you have just published a new post in a geek way.</p>
+
+<p>You may be curious about why <code>minerl build</code> output the final pages to the root of the repo, well remember that all directories that Minerl use are configurable, take a look at my <code>minerl.cfg</code> file:</p>
+
+<pre><code>[system]
+output_dir = .. 
+raw_dir = _raw
+page_dir = _pages
+page_suffix_regex = \.(?:md|markdown|html)$
+template_dir = _templates
+template_suffix = .html
+recent_posts_limit = 5
+
+[template]
+author = neevek
+email = i at neevek.net
+</code></pre>
+
+<p>In the configuration file I have pointed <code>output_dir</code> to the parent of the current directory, isn't that easy?</p>
+
+<p>Okay, now when you use Minerl, you should be clear about how to structure the directories and files of your Github Pages repo.</p>
+
+    </div>
+</div>
+<div id="sidebar">
+                    <h3>Recent Posts</h3>
+                    <ul>
+                        
+                        <li><a href="/2013/06/28/using-minerl-with-github-pages.html">Using Minerl with Github Pages</a> - <span class="createdate">Jun 28, 2013</span></li>
+                        
+                        <li><a href="/2013/06/27/introduction-to-minerl.html">Introduction to Minerl</a> - <span class="createdate">Jun 27, 2013</span></li>
+                        
+                    </ul>
+
+                    <h3>Tags</h3>
+                    <ul>
+                        
+                        <li><a href="/tags/github.html">github (1)</a></li>
+                        
+                        <li><a href="/tags/minerl.html">minerl (2)</a></li>
+                        
+                        <li><a href="/tags/perl.html">perl (1)</a></li>
+                        
+                    </ul>
+
+                    <h3>Archives</h3>
+                    <ul>
+                        
+                        <li><a href="/archives/2013/06.html">Jun, 2013 (2)</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <div id="footer">
+                Pages of this site are generated by <strong><em><a href="https://github.com/neevek/minerl">Minerl</a></em></strong> <br/> 
+                <a href="http://github.com/neevek">http://github.com/neevek</a><br />
+                <a href="http://weibo.com/neevek">@neevek</a> 
+            </div>
+        </div>
+    </body>
+</html>
