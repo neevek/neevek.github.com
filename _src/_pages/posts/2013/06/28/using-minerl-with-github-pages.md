@@ -76,7 +76,7 @@ As you can see, there is a `_src` directory, which holds a `minerl.cfg` file and
 
 With a few commands, you have just published a new post in a geek way.
 
-You may be curious about why `minerl build` output the final pages to the root of the repo, well remember that all directories that Minerl use are configurable, take a look at my `minerl.cfg` file:
+You may be curious about why `minerl build` output the final pages to the root of the repo, well remember that all directories that Minerl uses are configurable, take a look at my `minerl.cfg` file:
 
     [system]
     output_dir = .. 
