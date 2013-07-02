@@ -10,11 +10,11 @@ description: Minerl is a blog-aware static site generator written in Perl, it su
 
 ## Introduction
 
-[Minerl](https://github.com/neevek/minerl) is a blog-aware static site generator written in Perl, it supports *tagging*, *automatic archiving*, *post*, *page*, *layout inheritance*.
+[Minerl](https://github.com/neevek/minerl) is a blog-aware static site generator written in Perl, it supports *tagging*, *automatic archiving*, *post*, *page* and *layout inheritance*.
 
 ## Installation
 
-Before installation, make sure you have all modules required by **Minerl** installed, **Minerl** depends on the following modules:
+Before installation, make sure you have installed all modules required by **Minerl**, **Minerl** depends on the following modules:
 
     Config::IniFiles
     HTML::Template
@@ -102,7 +102,7 @@ For a normal page, the `type`, `tags` and `timestamp` headers are not needed. `s
 
 ## Builtin variables
 
-**Minerl** offers quite a few builtin variables that can be used to generate index pages of tags and archives. Builtin variables can be referenced in templates with [HTML::Template](http://search.cpan.org/~wonko/HTML-Template-2.94/lib/HTML/Template.pm) syntax.
+**Minerl** offers quite a few builtin variables that can be used to generate index pages for tags and archives. Builtin variables can be referenced in templates with [HTML::Template](http://search.cpan.org/~wonko/HTML-Template-2.94/lib/HTML/Template.pm) syntax.
 
 **Minerl** offers the following variables:
 
