@@ -20,6 +20,7 @@ Before installation, make sure you have installed all modules required by **Mine
     HTML::Template
     Text::Template
     Text::MultiMarkdown
+    Text::Textile
     Getopt::Compact::WithCmd
     HTTP::Server::Brick
 
@@ -30,8 +31,8 @@ I recommend [cpanm](https://raw.github.com/miyagawa/cpanminus/master/cpanm) for 
 
 After cpanm is installed, use the following command to install all required modules, note you may need root permission if your Perl modules are installed in system directory:
 
-    cpanm Config::IniFiles HTML::Template Text::Template \
-        Text::MultiMarkdown Getopt::Compact::WithCmd HTTP::Server::Brick
+    cpanm Config::IniFiles HTML::Template Text::Template Text::MultiMarkdown \
+        Text::Textile Getopt::Compact::WithCmd HTTP::Server::Brick
 
 Okay, all prerequisites are met, we are ready to install and try out **Minerl**. It is that straightforward, simply clone the code from github, change direcotry to the root of the project, `make && make install` installs the **minerl** script under `/usr/local/bin`:
 
@@ -154,6 +155,6 @@ The following code uses the `__minerl_tagged_posts` variable to list all posts o
 
 ## Formats
 
-Currently **Minerl** supports [markdown](http://search.cpan.org/~bobtfish/Text-MultiMarkdown-1.000034/lib/Text/MultiMarkdown.pm) and Perl script, you can write your pages using markdown, like the one I am writing and embed some perl scripts in the page.
+Currently **Minerl** supports [markdown](http://search.cpan.org/~bobtfish/Text-MultiMarkdown-1.000034/lib/Text/MultiMarkdown.pm), [textile](http://search.cpan.org/~bchoate/Text-Textile-2.12/lib/Text/Textile.pm) and Perl script, you can write your pages using markdown, like the one I am writing and embed some perl scripts in the page.
 
 For more information, run `minerl -h`.
