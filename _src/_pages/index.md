@@ -1,5 +1,5 @@
 ---
-title: neevek's cozy place
+title: NEEVEK - pragmatist, enthusiast, geek
 slug: index.html 
 layout: index 
 format: markdown
