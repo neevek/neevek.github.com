@@ -13,7 +13,7 @@ h1, h2, h3, h4, h5 {
 }
 
 #container {
-    width: 800px;
+    width: 960px;
     min-height:100%;
     position:relative;
     padding: 0;
@@ -76,7 +76,7 @@ h1, h2, h3, h4, h5 {
 
 #content {
     display: inline-block; 
-    width: 480px;
+    width: 640px;
     font-size: 14px;
     padding-left: 12px;
     line-height: 22px;
