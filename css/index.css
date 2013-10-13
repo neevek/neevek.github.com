@@ -1,0 +1,22 @@
+#index ul {
+    margin: 0px;
+    padding: 0px 0px 0px 16px;
+}
+
+#index li {
+    font-size: 14px;
+    list-style: none;
+    margin-right: 16px;
+}
+
+#index .post_title {
+    margin: 0px;
+    padding-bottom: 4px;
+    font-size: 24px;
+    line-height: 30px;
+}
+
+#index .post_content {
+    margin-bottom: 24px;
+    margin-right: 16px;
+}
