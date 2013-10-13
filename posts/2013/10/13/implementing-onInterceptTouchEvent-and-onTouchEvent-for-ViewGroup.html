@@ -1,0 +1,212 @@
+<!DOCTYPE HTML >
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="description" content="">
+        <title>Correctly implementing onInterceptTouchEvent and onTouchEvent methods for ViewGroup</title>
+        <link href='http://fonts.googleapis.com/css?family=EB+Garamond|Nothing+You+Could+Do|Titillium+Web' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/css/default.css" type="text/css" media="screen" charset="utf-8">
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="header">
+                <div id="nav">
+                    <ul>
+                        <li><a href="/index.html">HOME</a></li>
+                        <li><a href="/all-posts.html">POSTS</a></li>
+                        <li><a href="/about.html">ABOUT</a></li>
+                    </ul>
+                </div>
+                <div id="sig">
+                    driven by thirst for knowledge.
+                </div>
+            </div>
+
+            <div id="body">
+                <div id="content">
+    <h2 class="title">Correctly implementing onInterceptTouchEvent and onTouchEvent methods for ViewGroup</h2>
+
+    <div class="postmeta">
+        <span class="postmeta_text">Posted on</span> <span class="createdate"><a href="#" title="12:41 AM">Oct 13, 2013</a></span> by <span class="author">neevek</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="postmeta_text">Tags:</span>
+        
+        <span class="postmeta_tags"><a href="/tags/android.html">android</a></span>, 
+        
+        <span class="postmeta_tags"><a href="/tags/viewgroup.html">viewgroup</a></span>, 
+        
+        <span class="postmeta_tags"><a href="/tags/touch-events.html">touch-events</a></span>
+        
+
+    </div>
+
+    <div class="postcontent">
+        <p>There's already an <a href="http://developer.android.com/training/gestures/viewgroup.html">article</a> on this topic on the Android developer website, I write this post just to elaborate further on the topic to make it easier to understand.</p>
+
+<p><code>onTouchEvent</code> is declared in the <code>View</code> class, because any kind of views can handle touch events. While <code>onInterceptTouchEvent</code> is declared in the <code>ViewGroup</code> class, because <code>ViewGroup</code> is a <em>view container</em>, and only <em>view containers</em> may need to intercept touch events, like <code>ScrollView</code>, which intercepts <em>scroll</em> events to scroll its child views. When handling touch events in a <code>ViewGroup</code>, you will most probably need to implement both of these methods.</p>
+
+<p><code>onInterceptTouchEvent</code> is always the entry point for the first touch event, i.e. the <code>ACTION_DOWN</code> event, and in this method, you return <code>true</code> to indicate that the current <code>ViewGroup</code>(or more precisely, current <code>ViewGroup</code>'s <code>onTouchEvent</code> method) wants to handle all the touch events till next <code>ACTION_UP</code> or <code>ACTION_CANCEL</code>, and in most cases, the touch events between <code>ACTION_DOWN</code> and <code>ACTION_UP</code> or <code>ACTION_CANCEL</code> are <code>ACTION_MOVE</code>s, which will normally be recognized as scrolling/fling gestures.</p>
+
+<p>Let's say we have the following layout(MyViewGroup extends <code>ViewGroup</code>):</p>
+
+<pre><code>&lt;MyViewGroup
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"&gt;
+    &lt;Button
+            android:id="@+id/btnTest"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test" /&gt;
+
+    ...many other views here
+
+&lt;/MyViewGroup&gt;
+</code></pre>
+
+<p>I want to implement vertical scrolling for <code>MyViewGroup</code>, two cases need to be taken into account: </p>
+
+<ol>
+<li>I start scrolling by putting my finger on <code>MyViewGroup</code> itself and move vertically my finger on the screen.</li>
+<li>I start scrolling by putting my finger on a child view(<em>btnTest</em> button in the layout above) of <code>MyViewGroup</code> and move vertically my finger on the screen.</li>
+</ol>
+
+<p>To address these cases, we need to implement both <code>onInterceptTouchEvent</code> and <code>onTouchEvent</code>. </p>
+
+<p>For case one, things are easy, no matter what we return from <code>onInterceptTouchEvent</code>, the touch events will be propagated to <code>MyViewGroup</code>'s <code>onTouchEvent</code> method, the reason is that the target of the <code>ACTION_DOWN</code> event is <code>MyViewGroup</code> itself. <code>onTouchEvent</code> should always return <strong>true</strong> in this case, and it is supposed to handle all touch events that follow. Once <code>MyViewGroup</code>'s <code>onTouchEvent</code> returns true, <code>onInterceptTouchEvent</code> will <strong>NOT</strong> receive any touch events afterwards.</p>
+
+<p>For case two, <code>MyViewGroup</code>'s <code>onTouchEvent</code> method will <strong>NOT</strong> receive an <code>ACTION_DOWN</code> event, <code>onInterceptTouchEvent</code> will receive the the <code>ACTION_DOWN</code> event, but it must <strong>NOT</strong> return true for this event, because it is not the target of the event in this case and we have no idea whether the user wants to simply <em>tap</em> the button or <em>scroll</em> the content of <code>MyViewGroup</code>. When <code>onInterceptTouchEvent</code> starts receiving <code>ACTION_MOVE</code> events, we assume the user <strong>might</strong> want to scroll, and save the distance that the user's finger travels on the Y-axis, when the distance exceeds a preset threshold(say 40dp), we can be sure that the user wants to <em>scroll</em>, so we return <em>true</em> immediately. Once we return true from <code>onInterceptTouchEvent</code>, the button will receive its <strong>last</strong> touch event - <code>ACTION_CANCEL</code>, and all the touch events that follow will be directly propagated to <code>MyViewGroup</code>'s <code>onTouchEvent</code> method and be handled the same way as in case one.</p>
+
+<p>Note, for the threshold to determine a scroll gesture, we can use <code>ViewConfiguration.get(context).getScaledTouchSlop()</code>, touch slop is that threshold.</p>
+
+<p>Let's make a conclusion: the <code>onInterceptTouchEvent</code> method, as its name implies, has the power of intercepting any touch events and deciding who(itself or its child views) handles the events.</p>
+
+<p>To make this post complete, some code is attached.</p>
+
+<pre><code>@Override
+public boolean onInterceptTouchEvent(MotionEvent event) {
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            mLastX = event.getX();
+            mLastY = event.getY();
+            mStartY = mLastY;
+            break;
+        case MotionEvent.ACTION_CANCEL:
+        case MotionEvent.ACTION_UP:
+            mIsBeingDragged = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            float x = event.getX();
+            float y = event.getY();
+            float xDelta = Math.abs(x - mLastX);
+            float yDelta = Math.abs(y - mLastY);
+
+            float yDeltaTotal = y - mStartY;
+            if (yDelta &gt; xDelta &amp;&amp; Math.abs(yDeltaTotal) &gt; mTouchSlop) {
+                mIsBeingDragged = true;
+                mStartY = y;
+                return true;
+            }
+            break;
+    }
+
+    return false;
+}
+
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_CANCEL:
+        case MotionEvent.ACTION_UP:
+            mIsBeingDragged = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            float x = event.getX();
+            float y = event.getY();
+
+            float xDelta = Math.abs(x - mLastX);
+            float yDelta = Math.abs(y - mLastY);
+
+            float yDeltaTotal = y - mStartY;
+            if (!mIsBeingDragged &amp;&amp; yDelta &gt; xDelta &amp;&amp; Math.abs(yDeltaTotal) &gt; mTouchSlop) {
+                mIsBeingDragged = true;
+                mStartY = y;
+                yDeltaTotal = 0;
+            }
+            if (yDeltaTotal &lt; 0)
+                yDeltaTotal = 0;
+
+            if (mIsBeingDragged) {
+                scrollTo(0, yDeltaTotal);
+            }
+
+            mLastX = x;
+            mLastY = y;
+            break;
+    }
+
+    return true;
+}
+</code></pre>
+
+    </div>
+    <hr id="disqus_thread_separator" />
+    <div id="disqus_thread"></div>
+</div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+var disqus_shortname = 'neevek'; // required: replace example with your forum shortname
+
+/* * * DON'T EDIT BELOW THIS LINE * * */
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<div id="sidebar">
+                    <h3>Recent Posts</h3>
+                    <ul>
+                        
+                        <li><a href="/posts/2013/10/13/implementing-onInterceptTouchEvent-and-onTouchEvent-for-ViewGroup.html">Correctly implementing onInterceptTouchEvent and onTouchEvent methods for ViewGroup</a> - <span class="createdate">Oct 13, 2013</span></li>
+                        
+                        <li><a href="/posts/2013/06/28/using-minerl-with-github-pages.html">Using Minerl with Github Pages</a> - <span class="createdate">Jun 28, 2013</span></li>
+                        
+                        <li><a href="/posts/2013/06/27/introduction-to-minerl.html">Introduction to Minerl</a> - <span class="createdate">Jun 27, 2013</span></li>
+                        
+                    </ul>
+
+                    <h3>Tags</h3>
+                    <ul>
+                        
+                        <li><a href="/tags/android.html">android</a> (1)</li>
+                        
+                        <li><a href="/tags/github.html">github</a> (1)</li>
+                        
+                        <li><a href="/tags/minerl.html">minerl</a> (2)</li>
+                        
+                        <li><a href="/tags/perl.html">perl</a> (1)</li>
+                        
+                        <li><a href="/tags/touch-events.html">touch-events</a> (1)</li>
+                        
+                        <li><a href="/tags/viewgroup.html">viewgroup</a> (1)</li>
+                        
+                    </ul>
+
+                    <h3>Archives</h3>
+                    <ul>
+                        
+                        <li><a href="/archives/2013/06.html">Jun, 2013</a> (2)</li>
+                        
+                        <li><a href="/archives/2013/10.html">Oct, 2013</a> (1)</li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <div id="footer">
+                Pages of this site are generated by <strong><em><a href="https://github.com/neevek/minerl">Minerl</a></em></strong> <br />
+                All Rights Reserved. © 2013 neevek<br/>
+                <a href="http://github.com/neevek">http://github.com/neevek</a><br />
+            </div>
+        </div> 
+    </body>
+</html>
