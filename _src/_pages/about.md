@@ -1,5 +1,5 @@
 ---
-title: About - NEEVEK - pragmatist, enthusiast, geek
+title: About
 slug: about.html 
 layout: about 
 format: markdown
