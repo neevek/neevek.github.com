@@ -1,0 +1,152 @@
+<!DOCTYPE HTML >
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="description" content="">
+        <title>OpenGL - Rotating mapped texture in a rectangular viewport | neevek - pragmatist, enthusiast, geek</title>
+        <link href='http://fonts.googleapis.com/css?family=EB+Garamond|Nothing+You+Could+Do|Titillium+Web' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/css/default.css" type="text/css" media="screen" charset="utf-8">
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="header">
+                <div id="nav">
+                    <ul>
+                        <li><a href="/">HOME</a></li>
+                        <li><a href="/about">ABOUT</a></li>
+                    </ul>
+                </div>
+                <div id="sig">
+                    driven by thirst for knowledge.
+                </div>
+            </div>
+
+            <div id="body">
+                <div id="content">
+    <h2 class="title">OpenGL - Rotating mapped texture in a rectangular viewport</h2>
+
+    <div class="postmeta">
+        <span class="postmeta_text">Posted on</span> <span class="createdate"><a href="#" title="01:21 AM">Nov 26, 2017</a></span> by <span class="author">neevek</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="postmeta_text">Tags:</span>
+        
+        <span class="postmeta_tags"><a href="/tags/opengl.html">opengl</a></span>
+        
+
+    </div>
+
+    <div class="postcontent">
+        <p><img src="/image/rotated.jpg" alt="rotated" id="rotated"></p>
+
+<p>To map a texture to a rectangular viewport, we need to define at least 4 vertices for the rectangle, ensure that the texture coordinates are perfectly mapped to the vertices, and call <code>glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)</code> to draw the rectangle, this is easy and it works.</p>
+
+<p>Now I want to rotate the texture, say by 45 degrees, this sounds easy too. Simply multiply the vertices by a 4x4 matrix, with the matrix specified with a rotation of 45 degrees or M_PI/4 radians about the Z axis. We can use the OpenGL Math Library or GLM to help create the required matrix:</p>
+
+<pre><code>glm::mat4 transform;
+transform = glm::rotate(transform, glm::radians(45), glm::vec3(0.0f, 1.0f, 0.0));
+</code></pre>
+
+<p>This works, but only to some extent, because now the rectangle becomes a rhombus, depending on the degrees rotated, it may become a parallelogram, and the mapped texture is stretched. This is the issue that I am trying to solve in this article.</p>
+
+<p>To make the requirement clearer, I want the mapped texture rotated and its aspect ratio kept, like rotating a monitor(hopefully it's rectangular) on the table, its shape wouldn't change.</p>
+
+<p>Alright, let's get back to the topic. The reason why the mapped texture is stretched and becomes a rhombus is that the transformation is applied on the vertices, which are in NDC (Normalized Device Coordinates) unit, i.e. values ranging from -1 to 1 despite the physical dimensions of the rectangle. Also we have applied on the vertices a linear transformation(a rotation), which has two properties: Lines (or the sides of the rhombus) remain paralell and evenly spaced after being transformed.  So either the width or the height of the rectangle will be stretched at this point. </p>
+
+<p>Astute readers will notice that this is an issue related to aspect ratio of the rectangle, because if it is a square, after being rotated by any degrees, it remains a square. So the solution is to take into account the aspect ratio and scale the rectangle itself(or more precisely the vertices that connect to form the rectangle). The next step is to scale the Y axis to respect the aspect ratio:</p>
+
+<pre><code>float aspect_ratio = viewport_height / viewport_width;
+glm::mat4 transform;
+transform = glm::rotate(transform, glm::radians(45), glm::vec3(0.0f, 1.0f, 0.0));
+transform = glm::scale(transform, glm::vec3(1.0f, aspect_ratio, 1.0f));
+</code></pre>
+
+<p>That we scale the Y axis and not the X axis is because we choose height over width and not width over height as the aspect ratio. With the scale, now the rhombus becomes a parallelogram and the mapped texture is squashed along the Y axis (not stretched this time), the reason is that the rotated &amp; scaled vertices in the current coordinate space (Clipped Coordinate space) are entirely mapped to the viewport or the Screen Coordinate space, so squashed rectangle remains squashed rectangle.</p>
+
+<p>To fix the final issue, we will use the aspect ratio again. The idea is to map only a part of the entire Clipped Coordinate space to the viewport, by "a part of ...", you guess right, we use the aspect ratio here. To achieve that, we need to use an orthographic projection matrix:</p>
+
+<pre><code>float aspect_ratio = viewport_height / viewport_width;
+glm::mat4 transform;
+transform = glm::rotate(transform, glm::radians(45), glm::vec3(0.0f, 1.0f, 0.0));
+transform = glm::scale(transform, glm::vec3(1.0f, aspect_ratio, 1.0f));
+glm::mat4 ortho_proj = glm::ortho(
+    -1.0f,              // left
+    1.0f,               // right
+    -aspect_ratio,      // bottom
+    aspect_ratio,       // top
+    0.1f,               // near plane
+    0.0f                // far plane
+    ) * transform;    
+</code></pre>
+
+<p>The first and second parameter is the left and right of the coordinate space, -1 for left and 1 for right means the entire space along the X axis will be mapped to the X axis of the viewport, the third and forth parameter is the bottom and top of the coordinate space, and we use 'aspect_ratio' as the scalar to select a part of the Clipped Coordinate space along the Y axis to be mapped to the Y axis of the viewport, since orthographic projection is also a linear transformation, this effectively scales the selected part of the Clipped Coordinate space (now aspect ratio aware) to match the viewport (the final Screen Coordinate space), which stretches the parallelogram back to a rectangle.</p>
+
+<p>That's it, the mapped texture in a rectangular viewport is rotated and its aspect ratio is kept.</p>
+
+    </div>
+    <hr id="disqus_thread_separator" />
+    <div id="disqus_thread"></div>
+</div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+var disqus_shortname = 'neevek'; // required: replace example with your forum shortname
+
+/* * * DON'T EDIT BELOW THIS LINE * * */
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<div id="sidebar">
+                    <h3>Recent Posts</h3>
+                    <ul>
+                        
+                        <li><a href="/posts/2017/11/26/opengl-rotating-mapped-texture-in-a-rectangular-viewport.html">OpenGL - Rotating mapped texture in a rectangular viewport</a> - <span class="createdate">Nov 26, 2017</span></li>
+                        
+                        <li><a href="/posts/2013/10/13/implementing-onInterceptTouchEvent-and-onTouchEvent-for-ViewGroup.html">Correctly implementing onInterceptTouchEvent and onTouchEvent methods for ViewGroup</a> - <span class="createdate">Oct 13, 2013</span></li>
+                        
+                        <li><a href="/posts/2013/06/28/using-minerl-with-github-pages.html">Using Minerl with Github Pages</a> - <span class="createdate">Jun 28, 2013</span></li>
+                        
+                        <li><a href="/posts/2013/06/27/introduction-to-minerl.html">Introduction to Minerl</a> - <span class="createdate">Jun 27, 2013</span></li>
+                        
+                    </ul>
+
+                    <h3>Tags</h3>
+                    <ul>
+                        
+                        <li><a href="/tags/android">android</a> (1)</li>
+                        
+                        <li><a href="/tags/github">github</a> (1)</li>
+                        
+                        <li><a href="/tags/minerl">minerl</a> (2)</li>
+                        
+                        <li><a href="/tags/opengl">opengl</a> (1)</li>
+                        
+                        <li><a href="/tags/perl">perl</a> (1)</li>
+                        
+                        <li><a href="/tags/touch-events">touch-events</a> (1)</li>
+                        
+                        <li><a href="/tags/viewgroup">viewgroup</a> (1)</li>
+                        
+                    </ul>
+
+                    <h3>Archives</h3>
+                    <ul>
+                        
+                        <li><a href="/archives/2013/06">Jun, 2013</a> (2)</li>
+                        
+                        <li><a href="/archives/2013/10">Oct, 2013</a> (1)</li>
+                        
+                        <li><a href="/archives/2017/11">Nov, 2017</a> (1)</li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <div id="footer">
+                Pages of this site are generated by <strong><em><a href="https://github.com/neevek/minerl">Minerl</a></em></strong> <br />
+                All Rights Reserved. © 2013 - 2016 neevek<br/>
+                <a href="http://github.com/neevek">http://github.com/neevek</a><br />
+            </div>
+        </div> 
+    </body>
+</html>
