@@ -1,0 +1,292 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Arithmatic Quizzes</title>
+    <style>
+      @media print {
+        .editText {
+          border: 1px #ccc dotted;
+          font-size: 40pt;
+          font-style: bold;
+          height: 45pt;
+          width: 120pt;
+          vertical-align: middle;
+        }
+
+        .mainText {
+          font-size: 50pt;
+          font-style: bold;
+          text-align: center;
+        }
+
+        .buttonContainer {
+          display: none
+        }
+
+        .controlPanel {
+          display: none
+        }
+      }
+
+      @media screen {
+        body {
+          background-color: black;
+          color: #999999;
+        }
+
+        #container {
+          width: 1000px;
+          margin: 0px auto;
+          text-align: center;
+        }
+
+        .mainText {
+          font-size: 40px;
+          font-style: bold;
+          text-align: center;
+        }
+
+        .editText {
+          background-color: #000;
+          color: #eee;
+          border: 1px #666 solid;
+          font-size: 30px;
+          font-style: bold;
+          height: 30px;
+          width: 100px;
+          vertical-align: middle;
+        }
+
+        .checkResultButton {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .buttonContainer {
+          width: 100%;
+          height: 60px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .basicButton {
+          width: 33.33%;
+          border: none;
+          margin-left: 10px;
+          margin-right: 10px;
+          padding: 10px 24px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 18px;
+        }
+
+        .controlPanel {
+          font-size: 24px;
+          width: 100%;
+          height: 60px;
+          vertical-align: middle;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .controlPanelEditText {
+          background-color: #000;
+          color: #eee;
+          border: 1px #666 solid;
+          font-size: 16px;
+          font-style: bold;
+          height: 20px;
+          width: 50px;
+          margin-right: 4px;
+        }
+      }
+    </style>
+    <script type="text/javascript">
+
+function getParameterByName(name) {
+  var url = window.location.href;
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function randInt(min, max) {
+  if (min >= max) {
+    return max;
+  }
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function createTdWithInput() {
+  var td = document.createElement("td");
+  var input = document.createElement("input");
+  input.setAttribute("type", "text");
+  input.setAttribute("class", "editText");
+  input.oninput = function(e) {
+    if (e.target.value === "") {
+      e.target.style.backgroundColor = "#000";
+    }
+  };
+  input.onblur = checkResults;  // not efficient enough
+  input.onpropertychange = input.oninput; // for IE8
+  td.appendChild(input);
+  return td;
+}
+
+function createTdWithText(text, isOperand) {
+  var td = document.createElement("td");
+  var textNode = document.createTextNode(text);
+  td.appendChild(textNode);
+  td.setAttribute("class", "mainText");
+  if (isOperand) {
+    td.setAttribute("isOperand", "true");
+  }
+  return td;
+}
+
+function appendQuiz(tr, min, max, operator, acceptNegative) {
+  var op1 = randInt(min, max).toString();
+  var op2 = randInt(min, max).toString();
+  if (!acceptNegative && operator === "-" && op2 > op1) {
+    tmp = op1;
+    op1 = op2;
+    op2 = tmp;
+  }
+
+  tr.appendChild(createTdWithText(op1, true));
+  tr.appendChild(createTdWithText(operator));
+  tr.appendChild(createTdWithText(op2, true));
+  tr.appendChild(createTdWithText("= "));
+  tr.appendChild(createTdWithInput());
+}
+
+window.onload =
+  function() {
+    var min = parseInt(getParameterByName("min")) || 0;
+    var max = parseInt(getParameterByName("max")) || 100;
+    var lineCount = parseInt(getParameterByName("lineCount")) || 18;
+    var acceptNegative = getParameterByName("negative") === "true" || false;
+    var operator = getParameterByName("operator");
+    if (operator != "+" && operator != "-") {
+      operator = "+";
+    }
+
+    if (min >= max) {
+      min = max;
+    }
+
+    var tb = document.getElementById("main_table");
+    for (var i = 0; i < lineCount; ++i) {
+      var tr = document.createElement("tr");
+      appendQuiz(tr, min, max, operator, acceptNegative);
+      appendQuiz(tr, min, max, operator, acceptNegative);
+      tb.appendChild(tr);
+    }
+
+
+    if (operator === "+") {
+      document.getElementById("plus").checked = true;
+    } else {
+      document.getElementById("minus").checked = true;
+    }
+    document.getElementById("acceptNegative").checked = acceptNegative;
+    document.getElementById("min").value = min;
+    document.getElementById("max").value = max;
+    document.getElementById("lineCount").value = lineCount;
+  }
+
+  function getNextExpr(textNodeIterator) {
+    var operand1 = textNodeIterator.iterateNext();
+    if (!operand1) {
+      return undefined;
+    }
+    var operator = textNodeIterator.iterateNext();
+    var operand2 = textNodeIterator.iterateNext();
+    textNodeIterator.iterateNext(); // ignore the equals sign
+    return operand1.data + operator.data + operand2.data;
+  }
+
+  function checkResults() {
+    var quizXPath = "//table//descendant::*/text()[string-length(normalize-space(.))>0]";
+    var resultXPath = "//table//descendant::*/input";
+    var quizIt = document.evaluate(quizXPath, document, null, XPathResult.ANY_TYPE, null)
+    var resultIt = document.evaluate(resultXPath, document, null, XPathResult.ANY_TYPE, null)
+
+    var input = undefined;
+    while((input = resultIt.iterateNext())) {
+      var value = input.value;
+      var expr = getNextExpr(quizIt);
+      if (value.trim() != "") {
+        var result = eval(expr);
+        if (parseInt(value) != result) {
+          input.style.backgroundColor = "#900";
+        } else {
+          input.style.backgroundColor = "#090";
+        }
+      }
+    }
+  }
+
+  function reload() {
+    var url = window.location.href.split("?")[0];
+    var operator = document.querySelector('input[name=operator]:checked').value;
+    var acceptNegative = document.getElementById("acceptNegative").checked;
+    var min = document.getElementById("min").value;
+    var max = document.getElementById("max").value;
+    var lineCount = document.getElementById("lineCount").value;
+
+    url = "?operator=" + operator + "&negative=" + acceptNegative +
+      "&min=" + min + "&max=" + max + "&lineCount=" + lineCount;
+    window.location.href = url;
+  }
+
+    </script>
+  </head>
+  <body>
+
+    <div id="container">
+      <div class="buttonContainer">
+        <input class="basicButton checkResultButton" type="button" value="检查" onclick="checkResults()"/>
+        <input class="basicButton" type="button" value="换一套题" onclick="reload()"/>
+        <input class="basicButton" type="button" value="打印" onclick="window.print()"/>
+      </div>
+
+      <div class="controlPanel">
+        <input id="plus" name="operator" checked type="radio" value="+">加法
+        <input id="minus" name="operator" type="radio" value="-">减法
+        <input id="acceptNegative" type="checkbox">允许出现负数
+        最小数: <input id="min" class="controlPanelEditText" type="input" value="0">
+        最大数: <input id="max" class="controlPanelEditText" type="input" value="100">
+        行数: <input id="lineCount" class="controlPanelEditText" type="input" value="12">
+      </div>
+
+      <table id="main_table" width="100%" border="0">
+        <!--
+          <tr>
+          <td>232</td>
+          <td>+</td>
+          <td>342</td>
+          <td>=</td>
+          <td><input class="editText" type="text"></td>
+
+          <td>2</td>
+          <td>+</td>
+          <td>2</td>
+          <td>=</td>
+          <td><input class="editText" type="text"></td>
+          </tr>
+        -->
+      </table>
+    </div>
+    
+  </body>
+</html>
