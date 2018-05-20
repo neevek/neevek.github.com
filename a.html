@@ -105,10 +105,15 @@
           width: 50px;
           margin-right: 4px;
         }
+
+        #errorCount {
+          color: #fff;
+        }
       }
     </style>
     <script type="text/javascript">
 
+var errorCount = 0;
 function getParameterByName(name) {
   var url = window.location.href;
   name = name.replace(/[\[\]]/g, "\\$&");
@@ -126,17 +131,31 @@ function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function createTdWithInput() {
+function createTdWithInput(result) {
   var td = document.createElement("td");
   var input = document.createElement("input");
-  input.setAttribute("type", "text");
+  input.setAttribute("type", "number");
   input.setAttribute("class", "editText");
+  input.setAttribute("result", result);
   input.oninput = function(e) {
     if (e.target.value === "") {
       e.target.style.backgroundColor = "#000";
     }
   };
-  input.onblur = checkResults;  // not efficient enough
+  input.onblur = function(e) {
+    var value = e.target.value.trim();
+    if (value === "") {
+      return;
+    }
+
+    if (value.trim() !== e.target.getAttribute("result")) {
+      e.target.style.backgroundColor = "#900";
+      ++errorCount;
+    } else {
+      e.target.style.backgroundColor = "#090";
+    }
+    document.getElementById("errorCount").innerText = errorCount;
+  };  // not efficient enough
   input.onpropertychange = input.oninput; // for IE8
   td.appendChild(input);
   return td;
@@ -166,7 +185,7 @@ function appendQuiz(tr, min, max, operator, acceptNegative) {
   tr.appendChild(createTdWithText(operator));
   tr.appendChild(createTdWithText(op2, true));
   tr.appendChild(createTdWithText("= "));
-  tr.appendChild(createTdWithInput());
+  tr.appendChild(createTdWithInput(eval(op1 + operator + op2)));
 }
 
 window.onload =
@@ -216,24 +235,24 @@ window.onload =
   }
 
   function checkResults() {
-    var quizXPath = "//table//descendant::*/text()[string-length(normalize-space(.))>0]";
     var resultXPath = "//table//descendant::*/input";
-    var quizIt = document.evaluate(quizXPath, document, null, XPathResult.ANY_TYPE, null)
     var resultIt = document.evaluate(resultXPath, document, null, XPathResult.ANY_TYPE, null)
 
     var input = undefined;
     while((input = resultIt.iterateNext())) {
-      var value = input.value;
-      var expr = getNextExpr(quizIt);
-      if (value.trim() != "") {
-        var result = eval(expr);
-        if (parseInt(value) != result) {
-          input.style.backgroundColor = "#900";
-        } else {
-          input.style.backgroundColor = "#090";
-        }
+      var value = input.value.trim();
+      if (value === "") {
+        continue;
+      }
+      if (value != input.getAttribute("result")) {
+        input.style.backgroundColor = "#900";
+        ++errorCount;
+      } else {
+        input.style.backgroundColor = "#090";
       }
     }
+
+    document.getElementById("errorCount").innerText = errorCount;
   }
 
   function reload() {
@@ -264,9 +283,10 @@ window.onload =
         <input id="plus" name="operator" checked type="radio" value="+">加法
         <input id="minus" name="operator" type="radio" value="-">减法
         <input id="acceptNegative" type="checkbox">允许出现负数
-        最小数: <input id="min" class="controlPanelEditText" type="input" value="0">
-        最大数: <input id="max" class="controlPanelEditText" type="input" value="100">
-        行数: <input id="lineCount" class="controlPanelEditText" type="input" value="12">
+        最小数: <input id="min" class="controlPanelEditText" type="number" value="0">
+        最大数: <input id="max" class="controlPanelEditText" type="number" value="100">
+        行数: <input id="lineCount" class="controlPanelEditText" type="number" value="12">
+        出错次数: <span id="errorCount">0</span>
       </div>
 
       <table id="main_table" width="100%" border="0">
