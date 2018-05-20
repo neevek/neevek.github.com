@@ -16,7 +16,7 @@ GitHub: <a href="https://github.com/neevek" target="_blank">https://github.com/n
 <img src="http://stackoverflow.com/users/flair/668963.png" width="208" height="58" alt="profile for neevek at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for neevek at Stack Overflow, Q&amp;A for professional and enthusiast programmers">
 </a></span>
 
-I started my career in 2008 as a Java programmer on backend. In recent years I have been focusing on Android, dabbled in network programming, iOS and Python/Flask. My toolbox includes Java/C/C++/Objective-C, I also use Perl/Python/Bash Shell in my spare time.
+I started my career in 2008 as a Java programmer on backend. In recent years I have been focusing on Android, and my interests include network programming, computer graphics, software architecture designing and functional programming.
 
 And I am a tireless learner.
 
