@@ -161,30 +161,27 @@ function createTdWithInput(result) {
   return td;
 }
 
-function createTdWithText(text, isOperand) {
+function createTdWithText(text) {
   var td = document.createElement("td");
   var textNode = document.createTextNode(text);
   td.appendChild(textNode);
   td.setAttribute("class", "mainText");
-  if (isOperand) {
-    td.setAttribute("isOperand", "true");
-  }
   return td;
 }
 
 function appendQuiz(tr, min, max, operator, acceptNegative) {
-  var op1 = randInt(min, max).toString();
-  var op2 = randInt(min, max).toString();
-  if (!acceptNegative && operator === "-" && op2 > op1) {
+  var op1 = randInt(min, max);
+  var op2 = randInt(min, max);
+  if (!acceptNegative && operator == "-" && op2 > op1) {
     tmp = op1;
     op1 = op2;
     op2 = tmp;
   }
 
-  tr.appendChild(createTdWithText(op1, true));
+  tr.appendChild(createTdWithText(op1.toString()));
   tr.appendChild(createTdWithText(operator));
-  tr.appendChild(createTdWithText(op2, true));
-  tr.appendChild(createTdWithText("= "));
+  tr.appendChild(createTdWithText(op2.toString()));
+  tr.appendChild(createTdWithText("="));
   tr.appendChild(createTdWithInput(eval(op1 + operator + op2)));
 }
 
