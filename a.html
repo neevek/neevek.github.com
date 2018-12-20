@@ -53,7 +53,7 @@
           border: 1px #666 solid;
           font-size: 30px;
           font-style: bold;
-          height: 30px;
+          height: 32px;
           width: 100px;
           vertical-align: middle;
         }
@@ -170,6 +170,15 @@ function createTdWithText(text) {
 }
 
 function appendQuiz(tr, min, max, operator, acceptNegative) {
+  if (operator !== "+" && operator !== "-") {
+    var rand = randInt(0, 100);
+    if (rand < 50) {
+      operator = "+"
+    } else {
+      operator = "-"
+    }
+  }
+
   var op1 = randInt(min, max);
   var op2 = randInt(min, max);
   if (!acceptNegative && operator == "-" && op2 > op1) {
@@ -192,7 +201,7 @@ window.onload =
     var lineCount = parseInt(getParameterByName("lineCount")) || 18;
     var acceptNegative = getParameterByName("negative") === "true" || false;
     var operator = getParameterByName("operator");
-    if (operator != "+" && operator != "-") {
+    if (operator != "+" && operator != "-" && operator != "~") {
       operator = "+";
     }
 
@@ -211,8 +220,10 @@ window.onload =
 
     if (operator === "+") {
       document.getElementById("plus").checked = true;
-    } else {
+    } else if (operator === "-") {
       document.getElementById("minus").checked = true;
+    } else {
+      document.getElementById("plus_minus").checked = true;
     }
     document.getElementById("acceptNegative").checked = acceptNegative;
     document.getElementById("min").value = min;
@@ -279,6 +290,7 @@ window.onload =
       <div class="controlPanel">
         <input id="plus" name="operator" checked type="radio" value="+">加法
         <input id="minus" name="operator" type="radio" value="-">减法
+        <input id="plus_minus" name="operator" type="radio" value="~">加减法
         <input id="acceptNegative" type="checkbox">允许出现负数
         最小数: <input id="min" class="controlPanelEditText" type="number" value="0">
         最大数: <input id="max" class="controlPanelEditText" type="number" value="100">
